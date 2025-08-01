@@ -1,0 +1,3 @@
+F:/Linux c++/0voice/linux-c-0voice/2/2.2/2.2.1/2.2.1.1/cmake-build-debug/CMakeFiles/2_2_1_1.dir
+F:/Linux c++/0voice/linux-c-0voice/2/2.2/2.2.1/2.2.1.1/cmake-build-debug/CMakeFiles/edit_cache.dir
+F:/Linux c++/0voice/linux-c-0voice/2/2.2/2.2.1/2.2.1.1/cmake-build-debug/CMakeFiles/rebuild_cache.dir

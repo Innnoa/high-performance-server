@@ -1,0 +1,16 @@
+/home/innno/cmake-3.25.0/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /home/innno/code/0voice/2/2.2/2.2.1/mul_port_client_epoll -B /home/innno/code/0voice/2/2.2/2.2.1/mul_port_client_epoll/cmake-build-debug
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/innno/code/0voice/2/2.2/2.2.1/mul_port_client_epoll/cmake-build-debug
