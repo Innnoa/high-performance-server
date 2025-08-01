@@ -29,7 +29,7 @@ public:
     static constexpr size_t small_buffer_size = 256;
     static constexpr size_t max_events = 8192;
     static constexpr int backlog = 1024;
-    static constexpr size_t max_connections = 2100000;
+    static constexpr size_t max_connections = 1000000;
     static constexpr size_t pool_chunk_size = 10000;
     static constexpr size_t cleanup_batch_size = 1000;
 

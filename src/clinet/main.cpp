@@ -72,7 +72,7 @@ class epoll_client
 public:
     static constexpr size_t buffer_size = 128;
     static constexpr size_t max_events = 1024;
-    static constexpr size_t max_connections = 700000;
+    static constexpr size_t max_connections = 340000;
     static constexpr size_t connections_per_batch = 1000;
     static constexpr int max_ports = 20;
 
