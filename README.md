@@ -1,4 +1,4 @@
-# MillionConcurrentServer
+# high-performance-server
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C++](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://isocpp.org/)
@@ -47,15 +47,6 @@
 - GCC 11.0+ 或 Clang 13.0+
 - 至少4GB内存用于测试
 
-**编译：**
-```bash
-git clone https://github.com/Innnoa/high-performance-server.git
-cd high-performance-server
-mkdir build && cd build
-cmake ..
-make 
-```
-
 **系统调优（重要）：**
 ```bash
 # 必须要做，否则会在1024连接左右碰壁
@@ -64,13 +55,28 @@ echo "net.core.somaxconn = 65535" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 ```
 
-**运行：**
+**clone code：**
 ```bash
-# 启动服务器（监听端口2048-2067）
-./server
+git clone https://github.com/Innnoa/high-performance-server.git
+cd high-performance-server
+```
 
-# 另开终端，运行测试客户端
-./client 127.0.0.1 2048
+**编译运行 server ：**
+```bash
+cd src/server
+mkdir build && cd build
+cmake ..
+make
+./server
+```
+
+**编译运行 client ：**
+```bash
+cd src/client
+mkdir build && cd build
+cmake ..
+make
+./client [server端ip/127.0.0.1] 2048
 ```
 
 ## 项目结构
@@ -79,17 +85,13 @@ sudo sysctl -p
 src/
 ├── server/
 │   ├── main.cpp                 # 主服务器实现
-│   ├── leak_safe_server.cpp     # 内存安全版本
-│   └── modern_cpp20_server.cpp  # C++20优化版本
 ├── client/
 │   └── client.cpp               # 测试客户端
-└── common/
-    ├── memory_pool.hpp          # 内存管理工具
-    └── connection.hpp           # 连接抽象
-
-docs/                            # 文档和指南
-scripts/                         # 构建和测试脚本  
-tests/                          # 单元和集成测试
+│── docs/                        # 文档和指南
+│── .git/
+│── CONTRIBUTING
+│── LICENSE
+│── README      
 ```
 
 ## 实际使用考虑
