@@ -1,0 +1,4 @@
+/home/innno/.cache/JetBrains/RemoteDev/dist/243a1514282d0_CLion-2025.2/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "Unix Makefiles" -S /home/innno/code/project/high-performance-server/src/server -B /home/innno/code/project/high-performance-server/src/server/cmake-build-debug
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/innno/code/project/high-performance-server/src/server/cmake-build-debug

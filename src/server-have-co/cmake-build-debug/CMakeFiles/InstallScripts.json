@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/innno/code/project/high-performance-server/src/server/cmake-build-debug/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

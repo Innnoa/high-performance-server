@@ -1,0 +1,3 @@
+/home/innno/code/project/high-performance-server/src/server/cmake-build-debug/CMakeFiles/server.dir
+/home/innno/code/project/high-performance-server/src/server/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/innno/code/project/high-performance-server/src/server/cmake-build-debug/CMakeFiles/rebuild_cache.dir
