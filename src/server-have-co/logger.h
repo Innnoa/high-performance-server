@@ -8,11 +8,11 @@ enum class LogLevel { SILENT = 0, ERROR = 1, INFO = 2, DEBUG = 3 };
 
 class Logger {
  public:
-  static constexpr LogLevel DEFAULT_LEVEL = LogLevel::INFO;
+  static constexpr auto default_level_ = LogLevel::INFO;
 
   template <LogLevel Level>
   static void log(const std::string& message) {
-    if constexpr (Level <= DEFAULT_LEVEL) {
+    if constexpr (Level <= default_level_) {
       switch (Level) {
         case LogLevel::ERROR:
           std::cout << "[ERROR] " << message << std::endl;
@@ -30,7 +30,6 @@ class Logger {
     }
   }
 
-  // 便捷函数
   static void error(const std::string& message) {
     log<LogLevel::ERROR>(message);
   }

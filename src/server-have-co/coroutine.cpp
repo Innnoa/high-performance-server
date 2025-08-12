@@ -1,6 +1,5 @@
 #include "coroutine.h"
 
-// 系统相关头文件
 #define GNU_SOURCE
 #include <dlfcn.h>
 #include <sys/epoll.h>
@@ -15,28 +14,16 @@
 #include <mutex>
 #include <thread>
 
-// ============================================================================
-// 静态变量和全局变量定义
-// ============================================================================
-
-// Scheduler 的 thread_local 实例
 thread_local std::unique_ptr<Scheduler> Scheduler::instance_;
 
-// HookSystem 的静态变量
 bool HookSystem::initialized_ = false;
 
-// Hook 函数指针
-using read_t = ssize_t (*)(int fd, void* buf, size_t count);
-using write_t = ssize_t (*)(int fd, const void* buf, size_t count);
+using ReadT = ssize_t (*)(int fd, void* buf, size_t count);
+using WriteT = ssize_t (*)(int fd, const void* buf, size_t count);
 
-static read_t original_read = nullptr;
-static write_t original_write = nullptr;
+static ReadT original_read = nullptr;
+static WriteT original_write = nullptr;
 
-// ============================================================================
-// Hook 系统实现
-// ============================================================================
-
-// Hook read 函数 - 简化版
 extern "C" ssize_t read(const int fd, void* buf, const size_t count) {
   // 移除init_hooks()调用，假设已经初始化完成
 
@@ -59,7 +46,6 @@ extern "C" ssize_t read(const int fd, void* buf, const size_t count) {
   return ret;
 }
 
-// Hook write 函数 - 简化版
 extern "C" ssize_t write(const int fd, const void* buf, const size_t count) {
   const ssize_t ret = original_write(fd, buf, count);
   if (ret > 0) {
@@ -73,10 +59,8 @@ extern "C" ssize_t write(const int fd, const void* buf, const size_t count) {
 void HookSystem::initialize() {
   static std::once_flag init_flag;
   std::call_once(init_flag, [] {
-    // ReSharper disable once CppCStyleCast
-    original_read = (read_t)dlsym(RTLD_NEXT, "read");
-    // ReSharper disable once CppCStyleCast
-    original_write = (write_t)dlsym(RTLD_NEXT, "write");
+    original_read = (ReadT)dlsym(RTLD_NEXT, "read");
+    original_write = (WriteT)dlsym(RTLD_NEXT, "write");
 
     if (original_read && original_write) {
       std::cout << "Hook函数指针初始化完成" << std::endl;
@@ -90,10 +74,6 @@ void HookSystem::initialize() {
 }
 
 bool HookSystem::is_initialized() { return initialized_; }
-
-// ============================================================================
-// Coroutine 类实现
-// ============================================================================
 
 Coroutine::Coroutine(const CoroutineFunc func, void* arg,
                      const size_t stack_size)
@@ -127,10 +107,6 @@ void Coroutine::set_waiting_fd(const int fd) { waiting_fd_ = fd; }
 void Coroutine::clear_waiting_fd() { waiting_fd_ = -1; }
 
 void Coroutine::execute() const { func_(arg_); }
-
-// ============================================================================
-// Scheduler 类实现
-// ============================================================================
 
 Scheduler::Scheduler() {
   epoll_fd_ = epoll_create1(0);
@@ -238,7 +214,6 @@ void Scheduler::check_io_events() {
     return;
   }
 
-  // 只在有事件时才打印
   if (nfds > 0) {
 #ifdef DEBUG
     std::cout << "检测到 " << nfds << " 个IO事件" << std::endl;
@@ -287,10 +262,8 @@ void Scheduler::run_one_coroutine() {
   ready_queue_.pop();
   current_coroutine_ = next;
 
-  // 切换到协程上下文
   swapcontext(&main_context_, &next->context());
 
-  // 处理协程返回后的状态
   if (current_coroutine_) {
     handle_coroutine_return();
   }
@@ -305,9 +278,8 @@ void Scheduler::schedule_once() {
     std::cout << "协程调度器就绪" << std::endl;
   }
 
-  // 高负载时减少清理频率
   if (const int cleanup_interval =
-          (all_coroutines_.size() > 100000) ? 10000 : 1000;
+          all_coroutines_.size() > 100000 ? 10000 : 1000;
       ++schedule_count_ >= cleanup_interval) {
     cleanup_finished_coroutines();
     schedule_count_ = 0;
@@ -334,16 +306,13 @@ void Scheduler::handle_idle_state() {
   if (!is_idle_) {
     is_idle_ = true;
     idle_start_time_ = now;
-    return;  // 第一次进入空闲时只打印一次消息就返回
+    return;
   }
 
-  // 空闲状态下不需要频繁打印任何消息
-  // 如果真的需要周期性状态报告，可以设置很长的间隔
   const auto idle_duration =
       std::chrono::duration_cast<std::chrono::minutes>(now - idle_start_time_)
           .count();
 
-  // 每10分钟打印一次状态（可选）
   if (idle_duration > 0 && idle_duration % 10 == 0) {
     static long last_printed_minutes = 0;
     if (idle_duration != last_printed_minutes) {
@@ -366,8 +335,8 @@ void Scheduler::cleanup_finished_coroutines() {
     }
   }
 
-  const size_t cleaned_count = original_size - all_coroutines_.size();
-  if (cleaned_count > 0) {
+  if (const size_t cleaned_count = original_size - all_coroutines_.size();
+      cleaned_count > 0) {
     std::cout << "清理了 " << cleaned_count << " 个已完成的协程，"
               << "剩余 " << all_coroutines_.size() << " 个协程" << std::endl;
   }

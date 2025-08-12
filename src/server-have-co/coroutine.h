@@ -20,10 +20,8 @@ class Coroutine {
  public:
   using CoroutineFunc = void (*)(void*);
 
-  // 构造函数和核心接口
   Coroutine(CoroutineFunc func, void* arg, size_t stack_size = 8192);
 
-  // 禁止拷贝，允许移动
   Coroutine(const Coroutine&) = delete;
   Coroutine& operator=(const Coroutine&) = delete;
   Coroutine(Coroutine&&) = default;
@@ -31,7 +29,6 @@ class Coroutine {
 
   ~Coroutine() = default;
 
-  // 公共接口
   ucontext_t& context();
   [[nodiscard]] const ucontext_t& context() const;
   [[nodiscard]] CoroutineState state() const;
@@ -43,7 +40,6 @@ class Coroutine {
   void execute() const;
 
  private:
-  // 私有成员变量声明
   ucontext_t context_{};
   CoroutineState state_ = CoroutineState::READY;
   std::unique_ptr<char[]> stack_;
@@ -55,24 +51,18 @@ class Coroutine {
 
 class Scheduler {
  public:
-  // 单例接口
   static Scheduler& instance();
 
   void schedule_once();
-
-  // 核心接口
   Coroutine* create_coroutine(Coroutine::CoroutineFunc func, void* arg);
   void yield() const;
   void wait_for_read(int fd);
 
-  // 状态查询
   [[nodiscard]] bool in_coroutine() const;
   [[nodiscard]] bool has_waiting_coroutines() const;
 
-  // 上下文管理
   ucontext_t& get_main_context();
 
-  // 包装函数
   static void wrapper_function(Coroutine* coroutine);
 
   ~Scheduler();
@@ -80,7 +70,6 @@ class Scheduler {
  private:
   Scheduler();
 
-  // 私有方法
   void check_io_events();
   void run_one_coroutine();
   void handle_coroutine_return();
@@ -103,7 +92,6 @@ class Scheduler {
   bool main_context_ready_ = false;
 };
 
-// Hook系统声明
 class HookSystem {
  public:
   static void initialize();

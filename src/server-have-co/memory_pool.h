@@ -8,14 +8,12 @@
 #include <queue>
 #include <vector>
 
-// 缓冲区内存池 - 添加线程安全
 class BufferPool {
- private:
   struct BufferChunk {
     std::unique_ptr<char[]> data;
     size_t size;
 
-    BufferChunk(size_t count, size_t buffer_size)
+    BufferChunk(const size_t count, const size_t buffer_size)
         : data(std::make_unique<char[]>(count * buffer_size)),
           size(count * buffer_size) {}
   };
@@ -28,15 +26,14 @@ class BufferPool {
   std::atomic<bool> destroyed_{false};  // 标记是否已销毁
 
  public:
-  BufferPool(size_t buffer_size, size_t initial_count)
+  BufferPool(const size_t buffer_size, const size_t initial_count)
       : chunk_size_(initial_count), buffer_size_(buffer_size) {
     allocate_chunk();
   }
 
   ~BufferPool() {
     destroyed_.store(true);
-    std::lock_guard<std::mutex> lock(mutex_);
-    // 清空队列，但不需要手动释放内存（unique_ptr会处理）
+    std::lock_guard lock(mutex_);
     while (!free_buffers_.empty()) {
       free_buffers_.pop();
     }
@@ -50,7 +47,7 @@ class BufferPool {
   char* get_buffer() {
     if (destroyed_.load()) return nullptr;
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     if (destroyed_.load()) return nullptr;
 
     if (free_buffers_.empty()) {
@@ -66,7 +63,7 @@ class BufferPool {
   void return_buffer(char* buffer) {
     if (!buffer || destroyed_.load()) return;
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     if (destroyed_.load()) return;
 
     if (is_valid_buffer(buffer)) {
@@ -75,7 +72,7 @@ class BufferPool {
   }
 
   [[nodiscard]] size_t get_total_allocated() const {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     return buffer_chunks_.size() * chunk_size_ * buffer_size_;
   }
 
@@ -89,15 +86,15 @@ class BufferPool {
         free_buffers_.push(base + i * buffer_size_);
       }
     } catch (const std::bad_alloc&) {
-      std::cerr << "Failed to allocate buffer chunk" << std::endl;
+      std::cerr << "分配缓冲块失败" << std::endl;
     }
   }
 
   bool is_valid_buffer(const char* buffer) const {
     for (const auto& chunk : buffer_chunks_) {
       const char* start = chunk.data.get();
-      const char* end = start + chunk.size;
-      if (buffer >= start && buffer < end) {
+      if (const char* end = start + chunk.size;
+          buffer >= start && buffer < end) {
         return (buffer - start) % buffer_size_ == 0;
       }
     }
@@ -105,15 +102,13 @@ class BufferPool {
   }
 };
 
-// 连接对象内存池 - 添加线程安全和更安全的reset
 template <typename T>
 class ObjectPool {
- private:
   struct ObjectChunk {
     std::unique_ptr<T[]> data;
     size_t count;
 
-    explicit ObjectChunk(size_t chunk_count)
+    explicit ObjectChunk(const size_t chunk_count)
         : data(std::make_unique<T[]>(chunk_count)), count(chunk_count) {}
   };
 
@@ -124,13 +119,13 @@ class ObjectPool {
   std::atomic<bool> destroyed_{false};
 
  public:
-  explicit ObjectPool(size_t initial_count) : chunk_size_(initial_count) {
+  explicit ObjectPool(const size_t initial_count) : chunk_size_(initial_count) {
     allocate_chunk();
   }
 
   ~ObjectPool() {
     destroyed_.store(true);
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     while (!free_objects_.empty()) {
       free_objects_.pop();
     }
@@ -144,7 +139,7 @@ class ObjectPool {
   T* get_object() {
     if (destroyed_.load()) return nullptr;
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     if (destroyed_.load()) return nullptr;
 
     if (free_objects_.empty()) {
@@ -160,27 +155,22 @@ class ObjectPool {
   void return_object(T* obj) {
     if (!obj || destroyed_.load()) return;
 
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     if (destroyed_.load()) return;
 
     if (is_valid_object(obj)) {
-      // 安全地重置对象状态
       try {
-        // 先手动清理可能的指针成员
         reset_object_safely(obj);
-        // 然后placement new重新初始化
         new (obj) T();
         free_objects_.push(obj);
       } catch (...) {
-        // 如果重置失败，不放回池中，避免污染
-        std::cerr << "Failed to reset object, not returning to pool"
-                  << std::endl;
+        std::cerr << "重置对象失败，未返回池" << std::endl;
       }
     }
   }
 
   [[nodiscard]] size_t get_total_allocated() const {
-    std::lock_guard<std::mutex> lock(mutex_);
+    std::lock_guard lock(mutex_);
     return object_chunks_.size() * chunk_size_;
   }
 
@@ -209,9 +199,7 @@ class ObjectPool {
     return false;
   }
 
-  // 安全重置对象 - 特化处理Connection类型
   void reset_object_safely(T* obj) {
-    // 对于Connection类型，手动清理指针
     if constexpr (std::is_same_v<T, struct Connection>) {
       obj->fd = -1;
       obj->read_buffer = nullptr;

@@ -5,7 +5,7 @@
       <paths name="远程主机 (5f07e148-c916-4f7a-8eb9-5ee4fa86fe83)">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/innno/code/project/high-performance-server/src/server_c++20" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/server-have-co" local="$PROJECT_DIR$" />
           </mappings>
           <excludedPaths>
             <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
