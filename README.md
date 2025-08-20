@@ -179,12 +179,3 @@ valgrind --leak-check=full ./server
 ## 开源协议
 
 MIT License - 详见LICENSE文件。
-
-## 致谢
-
-受到了各种高性能服务器项目的启发：
-- nginx的事件处理
-- Redis的内存管理技术
-- libevent的设计模式
-
-感谢Linux内核开发者让epoll这么好用。
